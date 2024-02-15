@@ -13,7 +13,7 @@ if [ -z "$(ls -A $data_dir)" ]; then
     echo "目录为空。正在从GitHub拉取文件..."
 
     # 从GitHub上拉取文件到/data目录
-    git clone https://github.com/yourusername/yourrepository.git $data_dir
+    git clone https://github.com/chenanmo/Auto_Update_Operator.git $data_dir
 
     # 创建new和old文件夹
     mkdir $data_dir/new
