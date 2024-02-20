@@ -79,40 +79,42 @@ def download_chinaIP(x=0):
             i = x + 1
             download_chinaIP(i)
 
-    def search_china_operator_id(Operator_List: list[dict]) -> list[dict]:
-        """
 
-        :param Operator_List: 包含字典的营运商列表
-        :return: 营运商的名字和ID
-        """
-        name = operator_name
-        data: list[dict] = []
-        for operator in Operator_List:
-            if operator.get('name') == name:
-                data.append({"name": operator.get('name'), "id": operator.get('id')})
-        return data
+def search_china_operator_id(Operator_List: list[dict]) -> list[dict]:
+    """
 
-    if __name__ == '__main__':
-        now1 = datetime.now()
-        current_time1 = now1.strftime("%Y-%m-%d %H:%M:%S")
-        print('开始检测更新 ', current_time1)
-        download_chinaIP()  # 下载最新的IP
-        if detect_file_updates():  # 检测下载的IP和以前的是否一致,
-            print('大陆IP有变动,开始更新')
-            ikuai_Routing = ikuai_server(host_url=host_url, username=username, password=password)  # 登录爱快
-            operator = ikuai_Routing.Operator_list()  # 获取爱快的自定义营运商列表
-            if operator:
-                del_id = search_china_operator_id(operator)  # 获取可以删除的名字和ID
-                for i in del_id:
-                    ikuai_Routing.Operator_DEL(i.get('name'), i.get('id'))  # 删除旧的大陆IP
-            for ip in cutting():
-                ikuai_Routing.Operator_ADD(name=operator_name, ipgroup=ip)  # 上传新的大陆IP
+    :param Operator_List: 包含字典的营运商列表
+    :return: 营运商的名字和ID
+    """
+    name = operator_name
+    data: list[dict] = []
+    for operator in Operator_List:
+        if operator.get('name') == name:
+            data.append({"name": operator.get('name'), "id": operator.get('id')})
+    return data
 
-            shutil.copy('new/ip.txt', 'old/ip.txt')
-            now2 = datetime.now()
-            current_time2 = now2.strftime("%H:%M:%S")
-            print('更新完成 ', current_time2)
-        else:
-            now2 = datetime.now()
-            current_time2 = now2.strftime("%Y-%m-%d %H:%M:%S")
-            print('IP没有变化,不用更新 ', current_time2)
+
+if __name__ == '__main__':
+    now1 = datetime.now()
+    current_time1 = now1.strftime("%Y-%m-%d %H:%M:%S")
+    print('开始检测更新 ', current_time1)
+    download_chinaIP()  # 下载最新的IP
+    if detect_file_updates():  # 检测下载的IP和以前的是否一致,
+        print('大陆IP有变动,开始更新')
+        ikuai_Routing = ikuai_server(host_url=host_url, username=username, password=password)  # 登录爱快
+        operator = ikuai_Routing.Operator_list()  # 获取爱快的自定义营运商列表
+        if operator:
+            del_id = search_china_operator_id(operator)  # 获取可以删除的名字和ID
+            for i in del_id:
+                ikuai_Routing.Operator_DEL(i.get('name'), i.get('id'))  # 删除旧的大陆IP
+        for ip in cutting():
+            ikuai_Routing.Operator_ADD(name=operator_name, ipgroup=ip)  # 上传新的大陆IP
+
+        shutil.copy('new/ip.txt', 'old/ip.txt')
+        now2 = datetime.now()
+        current_time2 = now2.strftime("%H:%M:%S")
+        print('更新完成 ', current_time2)
+    else:
+        now2 = datetime.now()
+        current_time2 = now2.strftime("%Y-%m-%d %H:%M:%S")
+        print('IP没有变化,不用更新 ', current_time2)
