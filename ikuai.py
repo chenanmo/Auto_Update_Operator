@@ -78,9 +78,9 @@ class ikuai_server:
 
         response = httpx.request("POST", self.api_url, json=payload, cookies=self.cookies)
         if response.json()["Result"] == 30000:
-            print(f"删除{name}成功, ID为{id}")
+            print(f"删除营运商“{name}”成功, ID为{id}")
         else:
-            print(f"上传{name}失败, ID为{id}")
+            print(f"上传营运商“{name}”失败, ID为{id}")
 
     def __login(self):
         # 登录爱快后台
