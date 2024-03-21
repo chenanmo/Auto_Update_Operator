@@ -8,6 +8,8 @@ IKUAI_PASSWORD = 'test1234' # 爱快登录密码
 CHINAIP_URL = '' # IP文件下载地址,
 OPERATOR_NAME = 'test' # 自定义运营商名字
 CUSTOM_RUNTIME = '16:00' # 运行时间
+
+
 PS:
 可新建一个账户,但是必须给多线负载修改权限和新功能可读写权限
 下载的文件格式要求为txt,内容格式如下(1行一个IP段)
@@ -21,5 +23,12 @@ PS:
 27.0.188.0/22
 27.0.204.0/22
 27.0.208.0/21
-
 ```
+
+```text
+如果不在Docker环境下运行,那么需要修改程序根目录中的base.env文件,并复制或重命名为.env
+
+本地环境下执行 “python start.py” 启动本程序
+```
+
+Docker镜像地址: <https://hub.docker.com/r/chendarkdevil/auo>
