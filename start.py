@@ -65,6 +65,7 @@ def download_chinaIP(x=0):
             else:
                 print(f'下载营运商IP地址:“{operator_name}”失败,正在进行第{x}次重试')
                 i = x + 1
+                time.sleep(30)
                 download_chinaIP(i)
     except Exception as e:
         if x == 3:
@@ -74,6 +75,7 @@ def download_chinaIP(x=0):
         else:
             print(f'下载营运商IP地址:“{operator_name}”失败,正在进行第{x}次重试')
             i = x + 1
+            time.sleep(30)
             download_chinaIP(i)
 
 
