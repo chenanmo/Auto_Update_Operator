@@ -6,7 +6,7 @@ import filecmp
 import time
 from datetime import datetime
 import httpx
-
+import ipaddress
 from ikuai import ikuai_server
 
 # 设置环境变量, 测试环境
@@ -25,14 +25,43 @@ operator_name = os.getenv('OPERATOR_NAME')
 ip_lines = None
 
 
+
+
+def is_valid_cidr(cidr_str):
+    try:
+        ipaddress.ip_network(cidr_str)
+        return True
+    except ValueError:
+        return False
+
+
 def cutting():  # 切割为5000个IP段1组
-    lines = ip_lines.split('\n')
-    chunks = [','.join(lines[i:i + 5000]) for i in range(0, len(lines), 5000)]
+    global ip_lines
+
+    # 过滤掉注释行、空行和无效的CIDR
+    filtered_lines = []
+    for line in ip_lines.split('\n'):
+        line = line.strip()
+        if line and not line.startswith('#') and is_valid_cidr(line):
+            filtered_lines.append(line)
+
+    chunks = [','.join(filtered_lines[i:i + 5000]) for i in range(0, len(filtered_lines), 5000)]
     return chunks
 
 
+
+def get_valid_ip_lines(content):
+    """从内容中提取有效的IP行"""
+    valid_lines = []
+    for line in content.split('\n'):
+        line = line.strip()
+        if line and not line.startswith('#') and is_valid_cidr(line):
+            valid_lines.append(line)
+    return valid_lines
+
+
 def detect_file_updates() -> bool:
-    """检测下载文件是否有变动"""
+    """检测下载文件是否有变动，只比较有效的IP行"""
     dir1 = 'old'
     dir2 = 'new'
     filename = 'ip.txt'
@@ -40,15 +69,21 @@ def detect_file_updates() -> bool:
     file2 = os.path.join(dir2, filename)
 
     if os.path.exists(file1) and os.path.exists(file2):
-        same = filecmp.cmp(file1, file2)
-        return not same  # 如果文件不一致，则返回True；一致则返回False
+        with open(file1, 'r') as f1, open(file2, 'r') as f2:
+            content1 = f1.read()
+            content2 = f2.read()
+
+        # 只比较有效的IP行
+        valid_lines1 = get_valid_ip_lines(content1)
+        valid_lines2 = get_valid_ip_lines(content2)
+
+        return valid_lines1 != valid_lines2
     elif os.path.exists(file2):
         print('检测到为第一运行,old文件夹为空')
-        return True  # old文件夹下没有IP.txt文件，返回True
+        return True
     else:
         print('old和new文件夹下都没有ip.txt文件，退出执行')
         sys.exit()
-
 
 def download_chinaIP(x=0):
     """下载中国IP文件"""
@@ -68,9 +103,8 @@ def download_chinaIP(x=0):
                 sys.exit()
             else:
                 print(f'下载营运商IP地址:“{operator_name}”失败,正在进行第{x}次重试')
-                i = x + 1
                 time.sleep(30)
-                download_chinaIP(i)
+                download_chinaIP(x + 1)
     except Exception as e:
         if x == 3:
             # print(e)
@@ -78,9 +112,8 @@ def download_chinaIP(x=0):
             sys.exit()
         else:
             print(f'下载营运商IP地址:“{operator_name}”失败,正在进行第{x}次重试')
-            i = x + 1
             time.sleep(30)
-            download_chinaIP(i)
+            download_chinaIP(x + 1)
 
 
 def search_china_operator_id(Operator_List: list[dict]) -> list[dict]:
