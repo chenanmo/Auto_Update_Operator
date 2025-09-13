@@ -22,6 +22,9 @@ if [ -z "$(ls -A $data_dir)" ]; then
     echo "文件已从GitHub拉取，new/old目录已创建。"
 fi
 
+# 启动时先执行一次
+python3 /data/main.py
+
 # 死循环，持续检查时间并执行任务
 while true
 do
