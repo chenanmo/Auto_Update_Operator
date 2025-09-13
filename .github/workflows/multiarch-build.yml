@@ -1,0 +1,40 @@
+name: Multi-arch Docker build & push
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:   # 手动触发按钮
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1.  checkout 代码
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2.  设置 QEMU（用于模拟 arm64）
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # 3.  设置 Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 4.  登录 Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 5.  构建并推送多架构镜像
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/your-image-name:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/your-image-name:${{ github.sha }}
